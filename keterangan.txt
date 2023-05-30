@@ -1,0 +1,31 @@
+scr = index.js untuk server
+kemudian ada controllers dimana memanggil routes langsung ke controlles (semacam handler response)
+dari controller baru menuju use cases (semacam logic bisnis dan validasi nya)
+kemudian dari use case manggil ke repositories (semacam untuk model nya)
+kemudian model nya di definisikan
+
+helpers  (untuk mendefinisikan eror class, validasi email, response mesage dan export gambar )
+validator standar untuk email dan pw nya
+
+FoodsController yang mengimplementasikan fungsi-fungsi pengendali (controller) untuk operasi CRUD pada data makanan. 
+Setiap fungsi pengendali memanggil metode terkait dari foodsUsecase untuk memproses logika bisnis terkait makanan.
+Hasilnya dikirim sebagai respons JSON atau kesalahan dilemparkan untuk penanganan selanjutnya. 
+Controller ini bertindak sebagai perantara antara routes dan logika bisnis dalam aplikasi.
+
+FoodsRoutes mengekspor konfigurasi router untuk sebuah API makanan menggunakan Express.js. 
+//Modul ini berisi beberapa rute yang terkait dengan endpoint makanan, 
+//termasuk rute untuk mengambil semua makanan, mengambil makanan berdasarkan ID, 
+//mengambil makanan berdasarkan ID pengguna, membuat makanan baru, dan menghapus makanan berdasarkan ID. 
+//Beberapa rute menggunakan middleware verifyToken untuk memverifikasi token pengguna sebelum menjalankan fungsi yang terkait dengan rute tersebut.
+
+FoodsUsecase adalah bagian dari lapisan bisnis (use case) dalam aplikasi. Tujuannya adalah untuk mengatur logika bisnis terkait makanan.
+Konstruktor kelas ini menerima FoodsRepo sebagai parameter, yang digunakan untuk berinteraksi dengan lapisan data (repositori) terkait makanan.
+Terdapat fungsi-fungsi seperti getAllFoods, getFoodById, getFoodsByUserId, createFood, dan deleteFoodById yang mengimplementasikan logika bisnis 
+untuk melakukan operasi CRUD pada data makanan. Fungsi-fungsi ini menggunakan Joi untuk validasi data, mengakses FoodsRepo untuk berinteraksi dengan lapisan data,
+melakukan validasi otorisasi, dan menghasilkan respons yang sesuai.
+Terdapat juga fungsi-fungsi bantu seperti resolveFoods dan resolveFood yang membantu dalam memproses hasil dari operasi database dan mengembalikan data makanan yang lebih lengkap.
+Kelas FoodsUsecase bertindak sebagai perantara antara lapisan pengendali (controller) dan lapisan data (repositori), menyediakan logika bisnis yang diperlukan untuk mengelola data makanan.
+Kelas ini merupakan bagian penting dari arsitektur aplikasi yang memisahkan tugas-tugas seperti pengolahan data, validasi, dan logika bisnis ke dalam lapisan terpisah, sehingga memungkinkan pemeliharaan dan pengembangan yang lebih terstruktur dan terpisah.
+
+FoodsRepository ini berfungsi sebagai penghubung antara lapisan bisnis (use case) dan lapisan data (model Sequelize), 
+dengan menyediakan operasi-operasi dasar untuk mengakses dan memanipulasi data makanan dalam basis data.
