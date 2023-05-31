@@ -2,9 +2,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 const { NotFoundError, AuthenticationError, InvariantError } = require('../helpers/exceptions');
-const { getPagination } = require('../helpers/paging');
 const { users: usersMessage } = require('../helpers/response-message');
-const { getImageFromLetter, getFirstLetterFromPhrase } = require('../helpers/sign-language-images');
+const { getImageFromLetter, getFirstLetterFromPhrase } = require('../helpers/food-images');
 const { isValidEmail, isValidPass } = require('../helpers/validator');
 
 class UsersUsecase {
