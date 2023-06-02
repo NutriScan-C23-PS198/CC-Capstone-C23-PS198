@@ -1,6 +1,6 @@
 const { foods: foodsMessage } = require('../helpers/response-message');
 
-class FoodsController {
+class FoodController {
   constructor(foodsUsecase) {
     this.foodsUsecase = foodsUsecase;
     this.getAllFoods = this.getAllFoods.bind(this);
@@ -51,4 +51,4 @@ class FoodsController {
   }
 }
 
-module.exports = FoodsController;
+module.exports = FoodController;
