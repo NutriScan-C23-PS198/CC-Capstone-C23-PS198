@@ -2,18 +2,50 @@ const { handleError } = require('../helpers/exceptions');
 const verifyToken     = require('../helpers/middleware');
 
 // Router
-const brandRouter = require('./brand');
-const foodRouter  = require('./food');
-const userRouter  = require('./user');
-const scanRouter  = require('./scan');
-const authRouter  = require('./auth');
+const BrandRouter = require('./brand');
+const FoodRouter  = require('./food');
+const UserRouter  = require('./user');
+const ScanRouter  = require('./scan');
+const AuthRouter  = require('./auth');
 
 // Controller
-const brandController = require('../controller/brand');
-const foodController  = require('../controller/foods');
-const userController  = require('../controller/user');
-const scanController  = require('../controller/scan');
-const authController  = require('../controller/auth');
+const BrandController = require('../controllers/brand');
+const FoodController  = require('../controllers/food');
+const UserController  = require('../controllers/user');
+const ScanController  = require('../controllers/scan');
+const AuthController  = require('../controllers/auth');
+
+// Service
+const BrandService = require('../services/brand');
+const FoodService  = require('../services/food');
+const UserService  = require('../services/user');
+const ScanService  = require('../services/scan');
+const AuthService  = require('../services/auth');
+
+// DB
+const DBBrand = require('../databases/brand');
+const DBFood  = require('../databases/food');
+const DBUser  = require('../databases/user');
+const DBScan  = require('../databases/scan');
+const DBAuth  = require('../databases/auth');
+
+const dbBrand = new DBBrand();
+const dbFood  = new DBFood();
+const dbUser  = new DBUser();
+const dbScan  = new DBScan();
+const dbAuth  = new DBAuth();
+
+const brandService = new BrandService(dbBrand);
+const foodService  = new FoodService(dbFood);
+const userService  = new UserService(dbUser);
+const scanService  = new ScanService(dbScan);
+const authService  = new AuthService(dbAuth);
+
+const brandController = new BrandController(brandService);
+const foodController  = new FoodController(foodService);
+const userController  = new UserController(userService);
+const scanController  = new ScanController(scanService);
+const authController  = new AuthController(authService);
 
 
 module.exports = function routes(express, app) {
@@ -21,9 +53,10 @@ module.exports = function routes(express, app) {
     res.send({'msg': 'NutriScan API'});
   });
 
-  app.use('/brand', brandRouter(express, verifyToken, brandController));
-  app.use('/food',  foodRouter (express, verifyToken, foodController));
-  app.use('/user',  userRouter (express, verifyToken, userController));
-  app.use('/scan',  scanRouter (express, verifyToken, scanController));
-  app.use('/auth',  authRouter (express, verifyToken, authController));
+  app.use(['/register', '/login', '/logout'],
+          AuthRouter(express, verifyToken, authController));
+  app.use('/brand', BrandRouter(express, verifyToken, brandController));
+  app.use('/food',  FoodRouter (express, verifyToken, foodController));
+  app.use('/user',  UserRouter (express, verifyToken, userController));
+  app.use('/scan',  ScanRouter (express, verifyToken, scanController));
 }

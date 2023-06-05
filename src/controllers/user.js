@@ -1,4 +1,4 @@
-const { users: usersMessage } = require('../responses/response-message');
+const { users: usersMessage } = require('../helpers/response-message');
 
 class UserController {
   constructor(usersUsecase) {

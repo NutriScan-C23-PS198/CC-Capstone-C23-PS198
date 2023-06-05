@@ -1,4 +1,4 @@
-module.exports = function brandRouter(express, verifyToken, authController) {
+module.exports = function authRouter(express, verifyToken, authController) {
   const router = express.Router();
 
   router.post('/register', authController.register);

@@ -1,12 +1,12 @@
 const Joi = require('joi');
 const { NotFoundError, AuthorizationError, InvariantError } = require('../helpers/exceptions');
-//const { getPagination } = require('../helpers/paging');
+const getPage = require('../helpers/paging');
 const { foods: foodsMessage } = require('../helpers/response-message');
 //const { getImageFromLetter } = require('../helpers/food-images');
 
-class FoodsUsecase {
-  constructor(FoodsRepo) {
-    this.foodsRepo = FoodsRepo;
+class FoodService {
+  constructor(DBFood) {
+    this.dbFood = DBFood;
   }
 
   async getAllFoods(req) {
@@ -14,12 +14,17 @@ class FoodsUsecase {
       page: Joi.number(),
       size: Joi.number(),
     });
+
     await schema.validateAsync(req.query).catch((joiError) => {
       throw new InvariantError(joiError.details.map((x) => x.message));
     });
+
     const { page, size } = req.query;
-    const { limit, offset } = getPagination(page, size);
-    const ids = await this.foodsRepo.findAll(offset, limit);
+    const { offset, limit } = getPage(page, size);
+    console.log(`Page ${page} Size ${size} Offset ${offset} Limit ${limit}`)
+
+    const ids = await this.dbFood.findAll(offset, limit);
+
     return this.resolveFoods(ids.rows);
   }
 
@@ -47,12 +52,11 @@ class FoodsUsecase {
     const { id: userId } = req.params;
     const { query } = req.query;
 
-    // eslint-disable-next-line eqeqeq
     if (userId != credentialsId) throw new AuthorizationError(foodsMessage.forbidden);
     const { page, size } = req.query;
 
-    const { limit, offset } = getPagination(page, size);
-    const ids = await this.foodsRepo.findByUserId(offset, limit, userId, query);
+    const { limit, offset } = getPage(page, size);
+    const ids = await this.dbFood.findByUserId(offset, limit, userId, query);
     const result = [];
     ids.rows = ids.rows.forEach((element) => {
       result.push(element.id);
@@ -70,20 +74,35 @@ class FoodsUsecase {
     });
     const { userId } = req.user;
     req.body.userId = userId;
-    return this.foodsRepo
+    return this.dbFood
+      .create(req.body)
+      .then((food) => food);
+  }
+
+  // TODO: Implement service/food/updateFood (currently copied from another func)
+  async updateFoodById(req) {
+    const schema = Joi.object().keys({
+      text: Joi.string().required(),
+    });
+    await schema.validateAsync(req.body).catch((joiError) => {
+      throw new InvariantError(joiError.details.map((x) => x.message));
+    });
+    const { userId } = req.user;
+    req.body.userId = userId;
+    return this.dbFood
       .create(req.body)
       .then((food) => food);
   }
 
   async deleteFoodById(req) {
     const { userId } = req.user;
-    await this.foodsRepo
+    await this.dbFood
       .findById(req.params.id)
       .then((food) => {
         if (!food) throw new NotFoundError(foodsMessage.notFound);
         if (userId !== food.userId) throw new AuthorizationError(foodsMessage.forbidden);
 
-        return this.foodsRepo.deleteById(req.params.id);
+        return this.dbFood.deleteById(req.params.id);
       });
   }
 
@@ -101,7 +120,7 @@ class FoodsUsecase {
   }
 
   async resolveFood(id) {
-    return this.foodsRepo
+    return this.dbFood
       .findById(id)
       .then(async (food) => {
         if (food) {
@@ -116,4 +135,4 @@ class FoodsUsecase {
   }
 }
 
-module.exports = FoodsUsecase;
+module.exports = FoodService;
