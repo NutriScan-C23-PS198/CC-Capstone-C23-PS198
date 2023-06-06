@@ -12,12 +12,14 @@ class FoodController {
   }
 
   async getAllFoods(req, res, next) {
-    return this.foodService
-      .getAllFoods(req)
-      .then((foods) => res.status(200).json(foods))
-      // .catch((error) => next(error));
+  try {
+    const foods = await this.foodService.getAllFoods(req);
+    return res.status(200).json(foods);
+  } catch (error) {
+    return next(error);
   }
-
+}
+  
   async getFoodById(req, res, next) {
     return this.foodService
       .getFoodById(req)
