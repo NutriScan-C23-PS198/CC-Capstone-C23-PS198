@@ -4,7 +4,7 @@
 const express = require("express");
 const { home, register, login, logout, getAllUsers, getUserById, deleteUserById } = require("../controllers/users");
 const { verifyToken } = require("../middleware/verifyToken.js");
-const { refreshToken } = require("../controllers/refreshToken");
+const { refreshToken } = require("../middleware/refreshToken");
 
 const user = express.Router();
 

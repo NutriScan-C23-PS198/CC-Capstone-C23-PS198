@@ -1,7 +1,7 @@
 /*
   IMPORT MODULE JWT, BCRYPT, USER MODELS
 */
-const Users = require("../models/users");
+const Users = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
