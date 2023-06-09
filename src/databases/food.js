@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const Models = require('../models');
+const uuid = require('node-uuid');
 
 const { Op } = Sequelize;
 
@@ -24,25 +25,55 @@ class DBFood {
     //     ),
     //   }));
     return this.FoodModel
-      .findAndCountAll({ offset, limit }) // call the findAndCountAll method with the offset and limit options
-      .then(result => {
-        // result is an object with count and rows properties
-        const totalPages = Math.ceil(result.count / limit); // calculate the total number of pages
-        const currentPage = offset / limit + 1; // calculate the current page number
-        res.json({ // send the response as JSON
+      .findAndCountAll({
+        offset, limit,
+        include: [{
+          model: Models.FoodCategory,
+          attributes: [],
+        }],
+        attributes: [
+          'id', 'name', 'photo', 'portion', 'unit', 'callories',
+          [Sequelize.col('FoodCategory.name'), 'category']
+        ],
+      }).then(result => ({
           data: result.rows, // the records for the current page
           count: result.count, // the total number of records
-          totalPages, // the total number of pages
-          currentPage // the current page number
-        });
-      })
+          totalPages: Math.ceil(result.count / limit), // the total number of pages
+          currentPage: (offset / limit + 1) // the current page number
+        })
+      )
   }
 
   async findById(id) {
     return this.FoodModel
       .findOne({
-        where: { id: parseInt(id, 10) },
-        raw: true,
+        include: [{
+          model: Models.FoodCategory,
+          attributes: [],
+        }],
+        where: { id: uuid.parse(id, new Buffer.alloc(16)) },
+        attributes: [
+          'id', 'name', 'photo', 'portion', 'unit', 'callories',
+          [Sequelize.col('FoodCategory.name'), 'category']
+        ],
+        // raw: true,
+      })
+      .then((food) => food);
+  }
+
+  async findByName(name) {
+    return this.FoodModel
+      .findOne({
+        include: [{
+          model: Models.FoodCategory,
+          attributes: [],
+        }],
+        where: { name: name },
+        attributes: [
+          'id', 'name', 'photo', 'portion', 'unit', 'callories',
+          [Sequelize.col('FoodCategory.name'), 'category']
+        ],
+        // raw: true,
       })
       .then((food) => food);
   }

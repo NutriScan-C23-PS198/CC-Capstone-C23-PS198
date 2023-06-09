@@ -36,9 +36,8 @@ const User = db.define(
     created_at: Sequelize.DATE(),
   },
   {
+    timestamps: false,
     tableName: 'user_account',
-  },
-  {
     indexes: [
       {
         unique: true,

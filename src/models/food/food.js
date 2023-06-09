@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const db = require('../../databases/index');
+const uuid = require('node-uuid');
 
 // const Food = db.define(
 //   'Food',
@@ -63,11 +64,27 @@ const Food = db.define('Food', {
     primaryKey: true,
     unique: true,
     allowNull: false,
-    defaultValue: db.fn('uuid_to_bin', db.fn('uuid'), 1)
+    // defaultValue: DataTypes.UUIDV4,
+    defaultValue: db.fn('UUID_TO_BIN', uuid.v4(), 1),
+    get: function() {
+      if (this.getDataValue('id'))
+        return uuid.unparse(this.getDataValue('id'));
+    },
+    set: function(value) {
+      if (value) {
+        // swap the string UUID
+        var swapped = db.fn('UUID_TO_BIN', value, 1);
+        this.setDataValue('id', swapped);
+      }
+    }
   },
   name: {
     type: DataTypes.STRING(256),
-    allowNull: false
+    allowNull: false,
+  },
+  photo: {
+    type: DataTypes.STRING(256),
+    allowNull: true,
   },
   category_id: {
     type: DataTypes.STRING.BINARY,
@@ -76,16 +93,11 @@ const Food = db.define('Food', {
       key: 'id'
     },
     onDelete: 'CASCADE',
-    onUpdate: 'CASCADE'
-  },
-  brand_id: {
-    type: DataTypes.STRING.BINARY,
-    references: {
-      model: 'brand',
-      key: 'id'
+    onUpdate: 'CASCADE',
+    get: function() {
+      if (this.getDataValue('category_id'))
+        return uuid.unparse(this.getDataValue('category_id'));
     },
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE'
   },
   portion: {
     type: DataTypes.INTEGER
@@ -97,7 +109,10 @@ const Food = db.define('Food', {
   callories: {
     type: DataTypes.INTEGER
   }
-}, {
+},
+{
+  timestamps: false,
+  tableName: 'food',
   indexes: [
     {
       name: 'idx_food_id',

@@ -23,8 +23,8 @@ Food.belongsTo(FoodCategory, { foreignKey: 'category_id' });
 FoodCategory.hasMany(Food,   { foreignKey: 'category_id' });
 
 // Food & Brand
-Food.belongsTo(FoodBrand,    { foreignKey: 'brand_id'    });
-FoodBrand.hasMany(Food,      { foreignKey: 'brand_id'    });
+// Food.belongsTo(FoodBrand,    { foreignKey: 'brand_id'    });
+// FoodBrand.hasMany(Food,      { foreignKey: 'brand_id'    });
 
 // Food History
 Food.belongsToMany(

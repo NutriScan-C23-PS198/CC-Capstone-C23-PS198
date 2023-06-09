@@ -28,6 +28,7 @@
     "joi": "^17.9.2",
     "jwks-rsa": "^3.0.1",
     "mysql2": "^3.3.3",
+    "node-uuid": "^1.4.8",
     "sequelize": "^6.32.0"
   },
   "devDependencies": {
