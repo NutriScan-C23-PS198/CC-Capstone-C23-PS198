@@ -9,6 +9,15 @@ const Notifs = db.define(
       primaryKey: true,
       unique: true,
       allowNull: false,
+      defaultValue: db.fn('uuid_to_bin', db.fn('uuid'), 1),
+      get: function() {
+        if (this.getDataValue('id'))
+          return db.fn('bin_to_uuid', this.getDataValue('id'), 1)
+      },
+      set: function(value) {
+        if (value)
+          this.setDataValue('id', db.fn('uuid_to_bin', value, 1))
+      }
     },
     type: {
       type: DataTypes.ENUM('info', 'reminder', 'promotion'),
@@ -25,9 +34,8 @@ const Notifs = db.define(
     },
   },
   {
+    timestamps: false,
     tableName: 'notification',
-  },
-  {
     indexes: [
       {
         unique: true,

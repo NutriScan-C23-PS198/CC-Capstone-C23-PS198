@@ -21,9 +21,8 @@ const User = db.define(
     }
   },
   {
+    timestamps: false,
     tableName: 'logged_out_tokens',
-  },
-  {
     indexes: [
       {
         unique: true,

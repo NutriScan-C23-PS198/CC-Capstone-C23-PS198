@@ -25,9 +25,8 @@ const Scan = db.define(
     },
   },
   {
+    timestamps: false,
     tableName: 'notification',
-  },
-  {
     indexes: [
       {
         unique: true,

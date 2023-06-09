@@ -21,6 +21,7 @@ const UserNoif = db.define(
     }
   },
   {
+    timestamps: false,
     tableName: 'user_notification',
   },
 );

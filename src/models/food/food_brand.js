@@ -17,9 +17,8 @@ const FoodBrand = db.define(
     },
   },
   {
+    timestamps: false,
     tableName: 'brand',
-  },
-  {
     indexes: [
       {
         unique: true,

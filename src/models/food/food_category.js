@@ -9,6 +9,11 @@ const FoodCategory = db.define(
       primaryKey: true,
       unique: true,
       allowNull: false,
+      defaultValue: DataTypes.UUIDV4,
+      get: function() {
+        if (this.getDataValue('id'))
+          return uuid.unparse(this.getDataValue('id'));
+      },
     },
     name: {
       type: DataTypes.STRING,
@@ -16,9 +21,8 @@ const FoodCategory = db.define(
     },
   },
   {
+    timestamps: false,
     tableName: 'food_category',
-  },
-  {
     indexes: [
       {
         unique: true,

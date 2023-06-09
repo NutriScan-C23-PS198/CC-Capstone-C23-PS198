@@ -29,9 +29,8 @@ const UserHistory = db.define(
     },
   },
   {
+    timestamps: false,
     tableName: 'user_history',
-  },
-  {
     indexes: [
       {
         unique: true,

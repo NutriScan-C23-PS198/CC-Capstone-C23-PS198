@@ -1,10 +1,11 @@
-const { foods: foodsMessage } = require('../helpers/response-message');
+const { food: foodsMessage } = require('../helpers/response-message');
 
 class FoodController {
   constructor(foodService) {
     this.foodService = foodService;
     this.getAllFoods = this.getAllFoods.bind(this);
     this.getFoodById = this.getFoodById.bind(this);
+    this.getFoodByName = this.getFoodByName.bind(this);
     this.getFoodsByUserId = this.getFoodsByUserId.bind(this);
     this.createFood = this.createFood.bind(this);
     this.updateFoodById = this.updateFoodById.bind(this);
@@ -12,17 +13,22 @@ class FoodController {
   }
 
   async getAllFoods(req, res, next) {
-  try {
-    const foods = await this.foodService.getAllFoods(req);
-    return res.status(200).json(foods);
-  } catch (error) {
-    return next(error);
+    return this.foodService
+      .getAllFoods(req)
+      .then((foods) => res.status(200).json(foods))
+      .catch((error) => next(error));
   }
-}
   
   async getFoodById(req, res, next) {
     return this.foodService
       .getFoodById(req)
+      .then((food) => res.json(food))
+      .catch((error) => next(error));
+  }
+  
+  async getFoodByName(req, res, next) {
+    return this.foodService
+      .getFoodByName(req)
       .then((food) => res.json(food))
       .catch((error) => next(error));
   }
@@ -41,7 +47,7 @@ class FoodController {
         message: foodsMessage.create,
         data: food,
       }))
-      .catch((error) => next(error));
+      // .catch((error) => next(error));
   }
 
   async updateFoodById(req, res, next) {

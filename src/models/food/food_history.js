@@ -12,6 +12,7 @@ const FoodHistory = db.define(
     },
   },
   {
+    timestamps: false,
     tableName: 'user_history_food',
   },
 );
