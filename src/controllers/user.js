@@ -1,31 +1,32 @@
 const { users: usersMessage } = require('../helpers/response-message');
 
 class UserController {
-  constructor(usersUsecase) {
-    this.usersUsecase = usersUsecase;
+  constructor(userService) {
+    this.userService = userService;
     this.getAllUsers = this.getAllUsers.bind(this);
     this.getUserById = this.getUserById.bind(this);
     this.createUser = this.createUser.bind(this);
     this.login = this.login.bind(this);
-    this.deleteUserById = this.deleteUserById.bind(this);
+    this.logout = this.logout.bind(this);
+    this.deleteUserById = this.deleteUserByUsername.bind(this);
   }
 
   async getAllUsers(req, res, next) {
-    return this.usersUsecase
+    return this.userService
       .getAllUsers(req)
       .then((users) => res.status(200).json(users))
       .catch((error) => next(error));
   }
 
   async getUserById(req, res, next) {
-    return this.usersUsecase
+    return this.userService
       .getUserById(req.params.id)
       .then((user) => res.json(user))
       .catch((error) => next(error));
   }
 
   async createUser(req, res, next) {
-    return this.usersUsecase
+    return this.userService
       .createUser(req)
       .then((user) => res.status(201).json({
         message: usersMessage.create,
@@ -35,18 +36,27 @@ class UserController {
   }
 
   async login(req, res, next) {
-    return this.usersUsecase
+    return this.userService
       .login(req)
       .then((result) => res.json({
         message: usersMessage.loginSuccess,
         data: result,
       }))
+      // .catch((error) => next(error));
+  }
+
+  async logout(req, res, next) {
+    return this.userService
+      .logout(req)
+      .then((result) => res.json({
+        message: usersMessage.logoutSuccess
+      }))
       .catch((error) => next(error));
   }
 
-  async deleteUserById(req, res, next) {
-    return this.usersUsecase
-      .deleteUserById(req)
+  async deleteUserByUsername(req, res, next) {
+    return this.userService
+      .deleteUserByUsername(req)
       .then(() => res.json({
         message: usersMessage.delete,
       }))

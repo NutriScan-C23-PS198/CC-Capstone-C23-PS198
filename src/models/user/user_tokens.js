@@ -1,8 +1,8 @@
 const DataType = require('sequelize');
 const db = require('../../databases/index');
 
-const User = db.define(
-  'User',
+const UserToken = db.define(
+  'UserToken',
   {
     user_id: {
       type: DataType.UUID,
@@ -22,7 +22,7 @@ const User = db.define(
   },
   {
     timestamps: false,
-    tableName: 'logged_out_tokens',
+    tableName: 'user_token',
     indexes: [
       {
         unique: true,
@@ -33,4 +33,4 @@ const User = db.define(
   },
 );
 
-module.exports = User;
+module.exports = UserToken;

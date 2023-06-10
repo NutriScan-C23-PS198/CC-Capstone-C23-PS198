@@ -1,12 +1,12 @@
 const Models = require('../models');
 
-class DBScan {
+class DBToken {
   constructor() {
-    this.UsersModel = Models.Users;
+    this.TokenModel = Models.UserToken;
   }
 
   async findAll(offset, limit) {
-    return this.UsersModel
+    return this.TokenModel
       .findAndCountAll({
         order: [['createdAt', 'DESC']],
         attributes: ['id'],
@@ -23,7 +23,7 @@ class DBScan {
   }
 
   async findById(id) {
-    return this.UsersModel
+    return this.TokenModel
       .findOne({
         where: { id: parseInt(id, 10) },
         raw: true,
@@ -32,7 +32,7 @@ class DBScan {
   }
 
   async findByEmail(email) {
-    return this.UsersModel
+    return this.TokenModel
       .findOne({
         where: { email },
         raw: true,
@@ -40,23 +40,14 @@ class DBScan {
       .then((user) => user);
   }
 
-  async findByUsername(username) {
-    return this.UsersModel
-      .findOne({
-        where: { username },
-        raw: true,
-      })
-      .then((user) => user);
-  }
-
   async create(user) {
-    return this.UsersModel
+    return this.TokenModel
       .create(user)
       .then((result) => result);
   }
 
   async update(id, user) {
-    return this.UsersModel
+    return this.TokenModel
       .update(user, {
         where: {
           id,
@@ -66,7 +57,7 @@ class DBScan {
   }
 
   async deleteById(id) {
-    return this.UsersModel
+    return this.TokenModel
       .destroy({
         where: {
           id: parseInt(id, 10),
@@ -76,4 +67,4 @@ class DBScan {
   }
 }
 
-module.exports = DBScan;
+module.exports = DBToken;

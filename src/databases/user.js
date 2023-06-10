@@ -2,65 +2,101 @@ const Models = require('../models');
 
 class DBUser {
   constructor() {
-    this.UsersModel = Models.Users;
+    this.UserModel     = Models.User;
+    this.attributes    = ['id', 'username', 'email', 'name',
+                          'photo', 'created_at'];
+    this.attributesAll = ['id', 'username', 'email', 'password', 'name',
+                          'photo', 'created_at', 'token'];
   }
 
   async findAll(offset, limit) {
-    return this.UsersModel
+    return this.UserModel
       .findAndCountAll({
-        order: [['createdAt', 'DESC']],
-        attributes: ['id'],
-        limit,
-        offset,
-        raw: true,
+        offset, limit,
+        order: [['created_at', 'DESC']],
+        attributes: ['id', 'username', 'email', 'name',
+                     'photo', 'created_at'],
+        // raw: true,
       })
-      .then((users) => ({
-        count: users.count,
-        rows: users.rows.map(
-          (users.rows, (user) => user.id),
-        ),
+      .then((result) => ({
+        count: result.count, // the total number of records
+        data: result.rows, // the records for the current page
+        totalPages: Math.ceil(result.count / limit), // the total number of pages
+        currentPage: (offset / limit + 1) // the current page number
       }));
   }
 
   async findById(id) {
-    return this.UsersModel
+    return this.UserModel
       .findOne({
-        where: { id: parseInt(id, 10) },
-        raw: true,
+        where: { id: uuid.parse(id, new Buffer.alloc(16)) },
+        attributes: this.attributesAll,
+        // raw: true,
       })
       .then((user) => user);
   }
 
   async findByEmail(email) {
-    return this.UsersModel
+    return this.UserModel
       .findOne({
-        where: { email },
-        raw: true,
+        where: { email: email },
+        attributes: this.attributesAll,
+        // raw: true,
+      })
+      .then((user) => user);
+  }
+
+  async findByUsername(username) {
+    return this.UserModel
+      .findOne({
+        where: { username: username },
+        attributes: this.attributesAll,
+        // raw: true,
       })
       .then((user) => user);
   }
 
   async create(user) {
-    return this.UsersModel
+    return this.UserModel
       .create(user)
       .then((result) => result);
   }
 
-  async update(id, user) {
-    return this.UsersModel
-      .update(user, {
+  async update(id, data) {
+    return this.UserModel
+      .update(data, {
         where: {
-          id,
+          id: id,
         },
       })
       .then((result) => result);
   }
 
-  async deleteById(id) {
-    return this.UsersModel
+  async updateByUsername(username, data) {
+    return this.UserModel
+      .update(data, {
+        where: {
+          username: username,
+        },
+      })
+      .then((result) => result);
+  }
+
+  async updateByEmail(username, data) {
+    return this.UserModel
+      .update(data, {
+        where: {
+          username: username,
+        },
+      })
+      .then((result) => result);
+  }
+
+  async deleteByUsername(username) {
+    return this.UserModel
       .destroy({
         where: {
-          id: parseInt(id, 10),
+          username: username,
         },
       })
       .then((result) => result);

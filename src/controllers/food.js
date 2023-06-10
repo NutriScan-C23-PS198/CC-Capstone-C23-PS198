@@ -4,9 +4,10 @@ class FoodController {
   constructor(foodService) {
     this.foodService = foodService;
     this.getAllFoods = this.getAllFoods.bind(this);
-    this.getFoodById = this.getFoodById.bind(this);
-    this.getFoodByName = this.getFoodByName.bind(this);
-    this.getFoodsByUserId = this.getFoodsByUserId.bind(this);
+    this.getFood = this.getFood.bind(this);
+    // this.getFoodById = this.getFoodById.bind(this);
+    // this.getFoodByName = this.getFoodByName.bind(this);
+    // this.getFoodsByUserId = this.getFoodsByUserId.bind(this);
     this.createFood = this.createFood.bind(this);
     this.updateFoodById = this.updateFoodById.bind(this);
     this.deleteFoodById = this.deleteFoodById.bind(this);
@@ -19,16 +20,23 @@ class FoodController {
       .catch((error) => next(error));
   }
   
-  async getFoodById(req, res, next) {
-    return this.foodService
-      .getFoodById(req)
-      .then((food) => res.json(food))
-      .catch((error) => next(error));
-  }
+  // async getFoodById(req, res, next) {
+  //   return this.foodService
+  //     .getFoodById(req)
+  //     .then((food) => res.json(food))
+  //     .catch((error) => next(error));
+  // }
   
-  async getFoodByName(req, res, next) {
+  // async getFoodByName(req, res, next) {
+  //   return this.foodService
+  //     .getFoodByName(req)
+  //     .then((food) => res.json(food))
+  //     .catch((error) => next(error));
+  // }
+
+  async getFood(req, res, next) {
     return this.foodService
-      .getFoodByName(req)
+      .getFood(req)
       .then((food) => res.json(food))
       .catch((error) => next(error));
   }

@@ -1,4 +1,3 @@
-// eslint-disable-next-line max-classes-per-file
 class ClientError extends Error {
   constructor(statusCode, message) {
     super(message);
