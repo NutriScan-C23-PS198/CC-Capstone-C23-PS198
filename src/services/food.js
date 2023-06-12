@@ -1,9 +1,12 @@
 const Joi = require('joi');
 const db = require('../databases/index');
+const db = require('../databases/index');
 const { NotFoundError, AuthorizationError, InvariantError } = require('../helpers/exceptions');
 const { food: foodMessage } = require('../helpers/response-message');
 const { uploadImage, deleteImage } = require('./storage/storage');
 const getPage = require('../helpers/paging');
+const { food: foodMessage } = require('../helpers/response-message');
+//const { getImageFromLetter } = require('../helpers/food-images');
 
 class FoodService {
   constructor(DBFood) {
