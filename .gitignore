@@ -130,3 +130,11 @@ dist
 .pnp.*
 
 .sql/
+
+# NOTE: Remove this later after prediction available
+src/services/predict/*
+
+app.yaml
+sandbox-388314413993-9532539946bd.json
+testimg
+app.yaml

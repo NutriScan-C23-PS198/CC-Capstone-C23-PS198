@@ -3,8 +3,8 @@ module.exports = function foodsRouter(express, verifyToken, foodsController) {
 
   router.get('/', foodsController.getAllFoods);
   // router.get('/:id', verifyToken, foodsController.getFoodById);
-  router.get('/:id', foodsController.getFoodById);
-  router.get('/find', foodsController.getFoodByName);
+  // router.get('/:id', foodsController.getFoodById);
+  router.get('/find', foodsController.getFood);
   router.post('/', foodsController.createFood);
   router.put('/:id', foodsController.updateFoodById);
   router.delete('/:id', foodsController.deleteFoodById);

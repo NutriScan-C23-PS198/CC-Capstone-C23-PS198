@@ -36,29 +36,33 @@ class ScanService {
 
   async newScan(req) {
     const schema = Joi.object().keys({
-      name: Joi.string().required(),
-      email: Joi.string().email().required(),
-      password: Joi.string().required(),
+      photo: Joi.string().required(),
+      // token: Joi.string().required(),
     });
+
     await schema.validateAsync(req.body).catch((joiError) => {
       throw new InvariantError(joiError.details.map((x) => x.message));
     });
 
-    const { name, email, password } = req.body;
-    const isEmailExist = await this.dbScan.findByEmail(email);
+    const date = Date.now();
 
-    if (isEmailExist) throw new NotFoundError(usersMessage.emailExist);
-    if (!isValidEmail(email)) throw new InvariantError(usersMessage.invalidEmail);
-    if (!isValidPass(password)) throw new InvariantError(usersMessage.minimumPass);
+    // Upload to Google Cloud Storage and get the URL
+    if (req.body.photo) {
+      req.body.photo = await uploadImage(
+        "scan",
+        `${date}-${req.body.category}-${req.body.name}.jpeg`,
+        req.body.photo
+      );
+    }
 
-    const hashedPassword = await crypto.hash(req.body.password, 10);
-    req.body.password = hashedPassword;
-
-    const photo = getImageFromLetter(getFirstLetterFromPhrase(name));
-    req.body.photo = photo;
+    // Make a predict request to Vertex AI and return the results (array of predicted object names with their confidence level)
+    const predictedObjects = await predictImage(req.body.photo);
 
     return this.dbScan
-      .create(req.body)
+      .create({
+        photo: req.body.photo,
+        date : req.body.date
+      })
       .then(async (user) => this.resolveUser(user.id));
   }
 

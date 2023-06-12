@@ -4,5 +4,6 @@ node_modules/
 .editorconfig
 .env
 .gitignore
+app.yaml.example
 keterangan.txt
-
+testimg

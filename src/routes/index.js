@@ -26,12 +26,14 @@ const AuthService  = require('../services/auth');
 const DBBrand = require('../databases/brand');
 const DBFood  = require('../databases/food');
 const DBUser  = require('../databases/user');
+const DBToken = require('../databases/user_token');
 const DBScan  = require('../databases/scan');
 const DBAuth  = require('../databases/auth');
 
 const dbBrand = new DBBrand();
 const dbFood  = new DBFood();
 const dbUser  = new DBUser();
+const dbToken = new DBToken();
 const dbScan  = new DBScan();
 const dbAuth  = new DBAuth();
 
@@ -49,14 +51,21 @@ const authController  = new AuthController(authService);
 
 
 module.exports = function routes(express, app) {
+  const router = express.Router();
+
   app.get('/', (req, res) => {
     res.send({'msg': 'NutriScan API'});
   });
 
-  app.use(['/register', '/login', '/logout'],
-          AuthRouter(express, verifyToken, authController));
+  // SECTION: Auth
+  router.post('/register', userController.createUser);
+  router.post('/login',    userController.login);
+  router.post('/logout',   userController.logout);
+  app.use(router);
+
   app.use('/brand', BrandRouter(express, verifyToken, brandController));
   app.use('/food',  FoodRouter (express, verifyToken, foodController));
   app.use('/user',  UserRouter (express, verifyToken, userController));
   app.use('/scan',  ScanRouter (express, verifyToken, scanController));
+
 }

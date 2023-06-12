@@ -1,0 +1,15 @@
+runtime: nodejs18
+service: default
+
+env_variables:
+  TOKEN_KEY: 'NutriScan'
+
+  DB_NAME: 'NutriScan'
+  DB_USER: 'NutriScan-SA'
+  DB_PASS: 'TrustMeItsSecure'
+  DB_HOST: '127.0.0.1'
+  DB_PORT: 3306
+  DB_DIALECT: 'mysql'
+
+  GCLOUD_KEY_FILE: 'sandbox-388314413993-9532539946bd.json'
+  GCLOUD_STORAGE_BUCKET: 'sandbox-388314413993-assets'

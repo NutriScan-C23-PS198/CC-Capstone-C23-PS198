@@ -1,9 +1,9 @@
 const Joi = require('joi');
 const db = require('../databases/index');
 const { NotFoundError, AuthorizationError, InvariantError } = require('../helpers/exceptions');
+const { food: foodMessage } = require('../helpers/response-message');
+const { uploadImage, deleteImage } = require('./storage/storage');
 const getPage = require('../helpers/paging');
-const { foods: foodsMessage } = require('../helpers/response-message');
-//const { getImageFromLetter } = require('../helpers/food-images');
 
 class FoodService {
   constructor(DBFood) {
@@ -12,36 +12,73 @@ class FoodService {
 
   async getAllFoods(req) {
     const schema = Joi.object().keys({
-      page: Joi.number(),
-      size: Joi.number(),
+      page: Joi.number().min(1),
+      size: Joi.number().min(1).max(100),
     });
 
-    // await schema.validateAsync(req.query).catch((joiError) => {
-    //   throw new InvariantError(joiError.details.map((x) => x.message));
-    // });
-
-    // validate from request body
-    console.log(req);
+    // Validate from request body
+    await schema.validateAsync(req.query).catch((joiError) => {
+      throw new InvariantError(joiError.details.map((x) => x.message));
+    });
 
     const { page, size } = req.body;
     const { offset, limit } = getPage(page, size);
-    console.log(`Page ${page} Size ${size} Offset ${offset} Limit ${limit}`)
 
     // const ids = await this.dbFood.findAll(offset, limit);
     return this.dbFood.findAll(offset, limit);
   }
 
-  async getFoodById(req) {
-    const id = req.params.id;
-    // return this.resolveFood(req.params.id)
-    //   .then((food) => {
-    //     if (!food) throw new NotFoundError(foodsMessage.notFound);
-    //     if (id !== food.userId) throw new AuthorizationError(foodsMessage.forbidden);
+  async getFood(req) {
+    console.log(req.body);
+    const schema = Joi.object().keys({
+      // id: Joi.string()
+      //   .when('username', { is: Joi.exist(), then: Joi.optional(), otherwise: Joi.required() })
+      //   .when('email',    { is: Joi.exist(), then: Joi.optional(), otherwise: Joi.required() }),
+      id: Joi.alternatives()
+        .conditional('name', { is: Joi.exist(), then: Joi.optional(), otherwise: Joi.string().required() }),
+      name: Joi.alternatives()
+        .conditional('id',   { is: Joi.exist(), then: Joi.optional(), otherwise: Joi.string().required() }),
+    })
 
-    //     return food;
-    //   });
-    return this.dbFood.findById(id);
+    // Validate from request body
+    await schema.validateAsync(req.body).catch((joiError) => {
+      throw new InvariantError(joiError.details.map((x) => x.message));
+    });
+    
+    if (req.body.id) {
+      return this.dbFood
+        .findById(req.body.id)
+        .then((food) => {
+          if (!food) throw new NotFoundError(foodMessage.notFound);
+          return food;
+        });
+    } else {
+      return this.dbFood
+        .findByName(req.body.name)
+        .then((food) => {
+          if (!food) throw new NotFoundError(foodMessage.notFound);
+          return food;
+        });
+    }
   }
+
+  // async getFoodById(req) {
+  //   return this.dbFood
+  //     .findById(req.body.id)
+  //     .then((food) => {
+  //       if (!food) throw new NotFoundError(foodMessage.notFound);
+  //       return food;
+  //     });
+  // }
+
+  // async getFoodByName(req) {
+  //   return this.dbFood
+  //     .findByName(req.body.name)
+  //     .then((food) => {
+  //       if (!food) throw new NotFoundError(foodMessage.notFound);
+  //       return food;
+  //     });
+  // }
 
   // async getFoodsByUserId(req) {
   //   const schema = Joi.object().keys({
@@ -75,13 +112,13 @@ class FoodService {
     const schema = Joi.object().keys({
       name       : Joi.string().required(),
       category   : Joi.string().required().allow(null).default(""),
-      photo      : Joi.string().required().allow(null),
-      portion    : Joi.number().required(),
+      photo      : Joi.string().allow(null),
+      portion    : Joi.number().required().min(0),
       unit       : Joi.string().required().default("portion"),
-      callories  : Joi.number().required(),
+      callories  : Joi.number().required().min(0),
     });
 
-    console.log(req.body);
+    // console.log(req.body);
 
     await schema.validateAsync(req.body).catch((joiError) => {
       throw new InvariantError(joiError.details.map((x) => x.message));
@@ -90,7 +127,7 @@ class FoodService {
     const foodExist = await this.dbFood.findByName(req.body.name);
     if (foodExist) {
       throw new InvariantError(
-        foodsMessage.nameIsExist.replace("{FOODNAME}", req.body.name)
+        foodMessage.nameIsExist.replace("{FOODNAME}", req.body.name)
       );
     }
 
@@ -98,7 +135,13 @@ class FoodService {
     // const image = await resizeImage(req.body.photo, 100, 100);
 
     // Upload to Google Cloud Storage and get the URL
-    // const photo = await uploadImage(image);
+    if (req.body.photo) {
+      req.body.photo = await uploadImage(
+        "food",
+        `${req.body.category}-${req.body.name}.jpeg`,
+        req.body.photo
+      );
+    }
 
     await this.dbFood.create({
         name     : req.body.name,
@@ -114,7 +157,7 @@ class FoodService {
     );
     
     const newFood = await this.dbFood.findByName(req.body.name);
-    console.log(newFood);
+    // console.log(newFood);
 
     return newFood;
   }
@@ -151,8 +194,8 @@ class FoodService {
     await this.dbFood
       .findById(req.params.id)
       .then((food) => {
-        if (!food) throw new NotFoundError(foodsMessage.notFound);
-        if (userId !== food.userId) throw new AuthorizationError(foodsMessage.forbidden);
+        if (!food) throw new NotFoundError(foodMessage.notFound);
+        if (userId !== food.userId) throw new AuthorizationError(foodMessage.forbidden);
 
         return this.dbFood.deleteById(req.params.id);
       });

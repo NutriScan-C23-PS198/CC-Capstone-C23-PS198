@@ -5,11 +5,16 @@ const isValidEmail = (email) => {
   return re.test(email);
 };
 
+const isValidUsername = (username) => {
+  return username.length >= 3;
+};
+
 const isValidPass = (pass) => {
-  return pass.length >= 6;
+  return pass.length >= 8;
 };
 
 module.exports = {
   isValidEmail,
+  isValidUsername,
   isValidPass,
 };

@@ -10,20 +10,6 @@ class DBFood {
   }
 
   async findAll(offset, limit) {
-    // return this.FoodModel
-    //   .findAndCountAll({
-    //     attributes: ['id', 'name'],
-    //     order: [['name', 'DESC']],
-    //     limit: limit,
-    //     offset: offset,
-    //     raw: true,
-    //   })
-    //   .then((foods) => ({
-    //     count: foods.count,
-    //     rows: foods.rows.map(
-    //       (foods.rows, (food) => food.id),
-    //     ),
-    //   }));
     return this.FoodModel
       .findAndCountAll({
         offset, limit,
@@ -68,7 +54,7 @@ class DBFood {
           model: Models.FoodCategory,
           attributes: [],
         }],
-        where: { name: name },
+        where: { name: { [Op.like]: `%${name}%` } },
         attributes: [
           'id', 'name', 'photo', 'portion', 'unit', 'callories',
           [Sequelize.col('FoodCategory.name'), 'category']
