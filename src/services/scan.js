@@ -3,35 +3,27 @@ const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 const { NotFoundError, AuthenticationError, InvariantError } = require('../helpers/exceptions');
 const { users: usersMessage } = require('../helpers/response-message');
-const { getImageFromLetter, getFirstLetterFromPhrase } = require('../helpers/food-images');
 const { isValidEmail, isValidPass } = require('../helpers/validator');
+const db = require('../databases/index');
+const { uploadImage, deleteImage } = require('./storage/storage');
 
 class ScanService {
-
   constructor(DBScan) {
     this.dbScan = DBScan;
   }
 
-
-  // Get a list of scan results
   async getAllScans(req) {
-    // Validation schema
     const schema = Joi.object().keys({
-      page: Joi.number().min(1),  // page number
-      size: Joi.number().min(1),  // number of items per page
+      page: Joi.number(),
+      size: Joi.number(),
     });
-
-    // Validate from request body
-    await schema.validateAsync(req.body).catch((joiError) => {
+    await schema.validateAsync(req.query).catch((joiError) => {
       throw new InvariantError(joiError.details.map((x) => x.message));
     });
-
-    // Get page and size from request body
-    const { page,  size   } = req.body;
+    const { page, size } = req.query;
     const { limit, offset } = getPagination(page, size);
-    
-    // Get and return results
-    return this.dbScan.findAll(offset, limit);
+    const ids = await this.dbScan.findAll(offset, limit);
+    return this.resolveUsers(ids.rows);
   }
 
   async getScanById(id) {
@@ -48,13 +40,13 @@ class ScanService {
       photo: Joi.string().required(),
       // token: Joi.string().required(),
     });
-
+  
     await schema.validateAsync(req.body).catch((joiError) => {
       throw new InvariantError(joiError.details.map((x) => x.message));
     });
-
+  
     const date = Date.now();
-
+  
     // Upload to Google Cloud Storage and get the URL
     if (req.body.photo) {
       req.body.photo = await uploadImage(
@@ -63,16 +55,12 @@ class ScanService {
         req.body.photo
       );
     }
-
-    // Make a predict request to Vertex AI and return the results (array of predicted object names with their confidence level)
-    const predictedObjects = await predictImage(req.body.photo);
-
-    return this.dbScan
-      .create({
-        photo: req.body.photo,
-        date : req.body.date
-      })
-      .then(async (user) => this.resolveUser(user.id));
+  
+    // Return the uploaded photo URL and date
+    return {
+      photo: req.body.photo,
+      date: req.body.date
+    };
   }
 
   async deleteScanById(req) {
