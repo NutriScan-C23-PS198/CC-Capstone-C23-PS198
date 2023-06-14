@@ -1,14 +1,15 @@
 const { foods: scanMessage } = require('../helpers/response-message');
+//const scan = require('../routes/scan');
 
 class ScanController {
   constructor(scanService) {
-    this.scanService     = scanService;
-    this.getAllScans     = this.getAllScans.bind(this);
-    this.getScanById     = this.getScanById.bind(this);
+    this.scanService = scanService;
+    this.getAllScans = this.getAllScans.bind(this);
+    this.getScanById = this.getScanById.bind(this);
     this.getScanByUserId = this.getScanByUserId.bind(this);
-    this.newScan         = this.newScan.bind(this);
-    this.updateScanById  = this.updateScanById.bind(this);
-    this.deleteScanById  = this.deleteScanById.bind(this);
+    this.newScan = this.newScan.bind(this);
+    this.updateScanById = this.updateScanById.bind(this);
+    this.deleteScanById = this.deleteScanById.bind(this);
   }
 
   async getAllScans(req, res, next) {
@@ -35,9 +36,8 @@ class ScanController {
   async newScan(req, res, next) {
     return this.scanService
       .newScan(req)
-      .then((food) => res.status(201).json({
-        message: scanMessage.create,
-        data: food,
+      .then((scan) => res.status(201).json({
+        data: scan,
       }))
       .catch((error) => next(error));
   }
