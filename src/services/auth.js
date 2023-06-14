@@ -54,7 +54,7 @@ class AuthService {
 
     if (!match) throw new AuthenticationError(usersMessage.invalidLogin);
 
-    const accessToken = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
+    const accessToken  = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET,  { expiresIn: '1d' });
     const refreshToken = jwt.sign({ id: user.id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
     return { accessToken, refreshToken };

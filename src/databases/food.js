@@ -7,6 +7,25 @@ const { Op } = Sequelize;
 class DBFood {
   constructor() {
     this.FoodModel = Models.Food;
+    this.FoodCategoryModel = Models.FoodCategory;
+  }
+
+  async getCategoryId(food) {
+    // Get the ID of the category
+    const category_id = await this.FoodCategoryModel.findOrCreate({
+      where: { name: food.category },
+      defaults: {
+        name: food.category,
+      },
+      // attributes: ['id'],
+      // raw: true,
+    })
+    .then(([category, created]) => category.id);
+    
+    // Remove the unused category field
+    delete food.category;
+
+    return {category_id: category_id, ...food};
   }
 
   async findAll(offset, limit) {
@@ -14,7 +33,7 @@ class DBFood {
       .findAndCountAll({
         offset, limit,
         include: [{
-          model: Models.FoodCategory,
+          model: this.FoodCategoryModel,
           attributes: [],
         }],
         attributes: [
@@ -34,7 +53,7 @@ class DBFood {
     return this.FoodModel
       .findOne({
         include: [{
-          model: Models.FoodCategory,
+          model: this.FoodCategoryModel,
           attributes: [],
         }],
         where: { id: uuid.parse(id, new Buffer.alloc(16)) },
@@ -51,7 +70,7 @@ class DBFood {
     return this.FoodModel
       .findOne({
         include: [{
-          model: Models.FoodCategory,
+          model: this.FoodCategoryModel,
           attributes: [],
         }],
         where: { name: { [Op.like]: `%${name}%` } },
@@ -64,28 +83,52 @@ class DBFood {
       .then((food) => food);
   }
 
-  async findByUserId(offset, limit, userId, textQuery) {
-    const query = textQuery ? {
-      userId,
-      text: {
-        [Op.iLike]: `%${textQuery}%`,
-      },
-    } : { userId };
-    return this.FoodModel
-      .findAndCountAll({
-        order: [['createdAt', 'DESC']],
-        attributes: ['id'],
-        where: query,
-        limit,
-        offset,
-        raw: true,
-      })
-      .then((food) => food);
-  }
+  // async findByUserId(offset, limit, userId, textQuery) {
+  //   const query = textQuery ? {
+  //     userId,
+  //     text: {
+  //       [Op.Like]: `%${textQuery}%`,
+  //     },
+  //   } : { userId };
+  //   return this.FoodModel
+  //     .findAndCountAll({
+  //       order: [['createdAt', 'DESC']],
+  //       attributes: ['id'],
+  //       where: query,
+  //       limit,
+  //       offset,
+  //       raw: true,
+  //     })
+  //     .then((food) => food);
+  // }
 
   async create(food) {
+    // Get the ID of the category
+    if (food.category) {
+      food = await this.getCategoryId(food);
+    }
+
+    // Create the food
     return this.FoodModel
       .create(food)
+      .then((result) => result);
+  }
+
+  async update(id, food) {
+    // Get the ID of the category
+    if (food.category) {
+      food = await this.getCategoryId(food);
+    }
+
+    // Update the food
+    return this.FoodModel
+      .update(
+        food,
+        {
+          where: {
+            id: uuid.parse(id, new Buffer.alloc(16)),
+          },
+        })
       .then((result) => result);
   }
 
@@ -93,7 +136,7 @@ class DBFood {
     return this.FoodModel
       .destroy({
         where: {
-          id: parseInt(id, 10),
+          id: uuid.parse(id, new Buffer.alloc(16)),
         },
       })
       .then((result) => result);

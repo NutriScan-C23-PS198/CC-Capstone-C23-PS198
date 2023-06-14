@@ -7,22 +7,31 @@ const { getImageFromLetter, getFirstLetterFromPhrase } = require('../helpers/foo
 const { isValidEmail, isValidPass } = require('../helpers/validator');
 
 class ScanService {
+
   constructor(DBScan) {
     this.dbScan = DBScan;
   }
 
+
+  // Get a list of scan results
   async getAllScans(req) {
+    // Validation schema
     const schema = Joi.object().keys({
-      page: Joi.number(),
-      size: Joi.number(),
+      page: Joi.number().min(1),  // page number
+      size: Joi.number().min(1),  // number of items per page
     });
-    await schema.validateAsync(req.query).catch((joiError) => {
+
+    // Validate from request body
+    await schema.validateAsync(req.body).catch((joiError) => {
       throw new InvariantError(joiError.details.map((x) => x.message));
     });
-    const { page, size } = req.query;
+
+    // Get page and size from request body
+    const { page,  size   } = req.body;
     const { limit, offset } = getPagination(page, size);
-    const ids = await this.dbScan.findAll(offset, limit);
-    return this.resolveUsers(ids.rows);
+    
+    // Get and return results
+    return this.dbScan.findAll(offset, limit);
   }
 
   async getScanById(id) {

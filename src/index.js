@@ -1,7 +1,6 @@
 require('dotenv').config();
 
 // NOTE: Remind me to remove this before production
-// NOTE: Remind me to ... Well, I don't remember what I want to say here
 
 const express = require('express');
 const http = require('http');
@@ -36,10 +35,10 @@ routes(express, app);
 //     );
 // });
 
-server = http.createServer(app);
+const server = http.createServer(app);
 server.listen(PORT, HOST, () => {
-    console.log(
-      `Server Started at ${new Date().toLocaleString()}\n`
-      + `Running on port ${PORT}`
-    );
+  console.log(
+    `Server Started at ${new Date().toLocaleString()}\n`
+    + `Running on port ${HOST}:${PORT}`
+  );
 });

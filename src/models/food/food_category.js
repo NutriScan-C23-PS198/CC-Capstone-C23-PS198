@@ -5,14 +5,14 @@ const FoodCategory = db.define(
   'FoodCategory',
   {
     id: {
-      type: DataTypes.UUID,
+      type: DataTypes.INTEGER(),
       primaryKey: true,
       unique: true,
       allowNull: false,
+      autoIncrement: true,
       defaultValue: DataTypes.UUIDV4,
       get: function() {
-        if (this.getDataValue('id'))
-          return uuid.unparse(this.getDataValue('id'));
+        return this.getDataValue('id');
       },
     },
     name: {

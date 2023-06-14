@@ -20,6 +20,7 @@ module.exports = {
   food: {
     create: 'food has been created',
     delete: 'food has been deleted',
+    update: 'food has been updated',
     notFound: 'food not found',
     nameIsExist: 'food {FOODNAME} is already exists',
   },

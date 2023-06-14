@@ -88,8 +88,7 @@ class UserService {
       attributes: ['username', 'email', 'password', 'name', 'photo'],
     });
     
-    const newUser = await this.dbUser.findByEmail(req.body.email);
-    return newUser;
+    return this.dbUser.findByEmail(req.body.email);
   }
 
   async deleteUserByUsername(req) {

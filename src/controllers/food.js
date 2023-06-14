@@ -4,10 +4,10 @@ class FoodController {
   constructor(foodService) {
     this.foodService = foodService;
     this.getAllFoods = this.getAllFoods.bind(this);
-    this.getFood = this.getFood.bind(this);
     // this.getFoodById = this.getFoodById.bind(this);
     // this.getFoodByName = this.getFoodByName.bind(this);
     // this.getFoodsByUserId = this.getFoodsByUserId.bind(this);
+    this.findFood = this.findFood.bind(this);
     this.createFood = this.createFood.bind(this);
     this.updateFoodById = this.updateFoodById.bind(this);
     this.deleteFoodById = this.deleteFoodById.bind(this);
@@ -20,12 +20,12 @@ class FoodController {
       .catch((error) => next(error));
   }
   
-  // async getFoodById(req, res, next) {
-  //   return this.foodService
-  //     .getFoodById(req)
-  //     .then((food) => res.json(food))
-  //     .catch((error) => next(error));
-  // }
+  async getFoodById(req, res, next) {
+    return this.foodService
+      .getFoodById(req)
+      .then((food) => res.json(food))
+      .catch((error) => next(error));
+  }
   
   // async getFoodByName(req, res, next) {
   //   return this.foodService
@@ -34,9 +34,9 @@ class FoodController {
   //     .catch((error) => next(error));
   // }
 
-  async getFood(req, res, next) {
+  async findFood(req, res, next) {
     return this.foodService
-      .getFood(req)
+      .findFood(req)
       .then((food) => res.json(food))
       .catch((error) => next(error));
   }
@@ -55,15 +55,15 @@ class FoodController {
         message: foodsMessage.create,
         data: food,
       }))
-      // .catch((error) => next(error));
+      .catch((error) => next(error));
   }
 
   async updateFoodById(req, res, next) {
     return this.foodService
       .updateFoodById(req)
-      .then((food) => res.status(201).json({
+      .then(() => res.status(201).json({
+        status: 'ok',
         message: foodsMessage.update,
-        data: food,
       }))
       .catch((error) => next(error));
   }

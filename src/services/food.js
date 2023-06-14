@@ -1,22 +1,24 @@
 const Joi = require('joi');
 const db = require('../databases/index');
-const db = require('../databases/index');
 const { NotFoundError, AuthorizationError, InvariantError } = require('../helpers/exceptions');
 const { food: foodMessage } = require('../helpers/response-message');
 const { uploadImage, deleteImage } = require('./storage/storage');
 const getPage = require('../helpers/paging');
-const { food: foodMessage } = require('../helpers/response-message');
-//const { getImageFromLetter } = require('../helpers/food-images');
 
 class FoodService {
-  constructor(DBFood) {
-    this.dbFood = DBFood;
+
+  constructor(DBFood, DBFoodCategory) {
+    this.dbFood         = DBFood;
   }
 
+
+  // Get a list of foods
   async getAllFoods(req) {
+    // Validation schema
     const schema = Joi.object().keys({
-      page: Joi.number().min(1),
-      size: Joi.number().min(1).max(100),
+      page       : Joi.number().min(1),           // page number
+      size       : Joi.number().min(1).max(100),  // number of food shown per page
+      category   : Joi.string().optional(),       // food category
     });
 
     // Validate from request body
@@ -24,38 +26,39 @@ class FoodService {
       throw new InvariantError(joiError.details.map((x) => x.message));
     });
 
-    const { page, size } = req.body;
+    // Get page and size from request body
+    const { page,   size  } = req.body;
     const { offset, limit } = getPage(page, size);
 
-    // const ids = await this.dbFood.findAll(offset, limit);
+    // Get and return result
     return this.dbFood.findAll(offset, limit);
   }
 
-  async getFood(req) {
-    console.log(req.body);
+
+  // Find specific food by id or name
+  async findFood(req) {
+    // Validation schema, either by id, by name, or both
     const schema = Joi.object().keys({
-      // id: Joi.string()
-      //   .when('username', { is: Joi.exist(), then: Joi.optional(), otherwise: Joi.required() })
-      //   .when('email',    { is: Joi.exist(), then: Joi.optional(), otherwise: Joi.required() }),
       id: Joi.alternatives()
         .conditional('name', { is: Joi.exist(), then: Joi.optional(), otherwise: Joi.string().required() }),
       name: Joi.alternatives()
         .conditional('id',   { is: Joi.exist(), then: Joi.optional(), otherwise: Joi.string().required() }),
-    })
+    });
 
     // Validate from request body
     await schema.validateAsync(req.body).catch((joiError) => {
       throw new InvariantError(joiError.details.map((x) => x.message));
     });
     
-    if (req.body.id) {
+    if (req.body.id) {  // Find by id
       return this.dbFood
         .findById(req.body.id)
         .then((food) => {
           if (!food) throw new NotFoundError(foodMessage.notFound);
           return food;
         });
-    } else {
+    } else {            // Find by name
+      console.log(`Find by name: ${req.body.name}`);
       return this.dbFood
         .findByName(req.body.name)
         .then((food) => {
@@ -65,53 +68,10 @@ class FoodService {
     }
   }
 
-  // async getFoodById(req) {
-  //   return this.dbFood
-  //     .findById(req.body.id)
-  //     .then((food) => {
-  //       if (!food) throw new NotFoundError(foodMessage.notFound);
-  //       return food;
-  //     });
-  // }
 
-  // async getFoodByName(req) {
-  //   return this.dbFood
-  //     .findByName(req.body.name)
-  //     .then((food) => {
-  //       if (!food) throw new NotFoundError(foodMessage.notFound);
-  //       return food;
-  //     });
-  // }
-
-  // async getFoodsByUserId(req) {
-  //   const schema = Joi.object().keys({
-  //     page : Joi.number(),
-  //     size : Joi.number(),
-  //     query: Joi.string(),
-  //   });
-    
-  //   await schema.validateAsync(req.query).catch((joiError) => {
-  //     throw new InvariantError(joiError.details.map((x) => x.message));
-  //   });
-
-  //   const { userId: credentialsId } = req.user;
-  //   const { id: userId } = req.params;
-  //   const { query } = req.query;
-
-  //   if (userId != credentialsId) throw new AuthorizationError(foodsMessage.forbidden);
-  //   const { page, size } = req.query;
-
-  //   const { limit, offset } = getPage(page, size);
-  //   const ids = await this.dbFood.findByUserId(offset, limit, userId, query);
-  //   const result = [];
-  //   ids.rows = ids.rows.forEach((element) => {
-  //     result.push(element.id);
-  //   });
-
-  //   return this.resolveFoods(result);
-  // }
-
+  // Add new food data
   async createFood(req) {
+    // Validation schema
     const schema = Joi.object().keys({
       name       : Joi.string().required(),
       category   : Joi.string().required().allow(null).default(""),
@@ -121,12 +81,12 @@ class FoodService {
       callories  : Joi.number().required().min(0),
     });
 
-    // console.log(req.body);
-
+    // Validate from request body
     await schema.validateAsync(req.body).catch((joiError) => {
       throw new InvariantError(joiError.details.map((x) => x.message));
     });
     
+    // Check if food already exist
     const foodExist = await this.dbFood.findByName(req.body.name);
     if (foodExist) {
       throw new InvariantError(
@@ -146,6 +106,7 @@ class FoodService {
       );
     }
 
+    // Insert the new food data
     await this.dbFood.create({
         name     : req.body.name,
         category : req.body.category,
@@ -159,78 +120,103 @@ class FoodService {
       // }
     );
     
+    // Return the newly created food data
     const newFood = await this.dbFood.findByName(req.body.name);
-    // console.log(newFood);
 
     return newFood;
   }
 
-  // TODO: Implement service/food/updateFood (currently copied from another func)
-  async updateFoodById(req) {
-    // const schema = Joi.object().keys({
-    //   // text: Joi.string().required(),
-    // });
-    // await schema.validateAsync(req.body).catch((joiError) => {
-    //   throw new InvariantError(joiError.details.map((x) => x.message));
-    // });
-    // const { userId } = req.user;
-    // req.body.userId = userId;
-    return this.dbFood
-      .create(req.body)
-      .then((food) => food);
-  }
 
-  async updateFoodByName(req) {
-    const schema = Joi.object().keys({
-      name: Joi.string().required(),
+  // Update an existing food data, selected by id
+  async updateFoodById(req) {
+    // Request parameters validation schema
+    const schemaParams = Joi.object().keys({
+      id: Joi.string().guid().required(),
     });
-    await schema.validateAsync(req.body).catch((joiError) => {
+
+    // Validate from request params
+    await schemaParams.validateAsync(req.params).catch((joiError) => {
       throw new InvariantError(joiError.details.map((x) => x.message));
     });
-    return this.dbFood
-      .create(req.body)
+
+    delete req.body.token;
+    
+    // Check if food is exists
+    const food = await this.dbFood.findById(req.params.id);
+    if (!food) throw new NotFoundError(foodMessage.notFound);
+    
+    // Request body validation schema
+    const schemaBody = Joi.object().keys({
+      name           : Joi.string(),
+      photo          : Joi.string().allow(null),
+      portion        : Joi.number().min(0),
+      unit           : Joi.string(),
+      callories      : Joi.number().min(0),
+      category       : Joi.string().allow(null).default("uncategorized"),
+    });
+
+    // Validate from request body
+    await schemaBody.validateAsync(req.body).catch((joiError) => {
+      throw new InvariantError(joiError.details.map((x) => x.message));
+    });
+
+    const fields = Object.keys(req.body);
+
+    // Upload to Google Cloud Storage and get the URL
+    if (req.body.photo) {
+      const photo_url = await uploadImage(
+        "food",
+        `${req.body.category}-${req.body.name}.jpeg`,
+        req.body.photo
+      );
+      req.body = { ...req.body, photo: photo_url };
+    }
+
+    // Update the food data
+    await this.dbFood
+      .update(req.params.id, req.body)
       .then((food) => food);
   }
 
+
+  // Delete an existing food data, selected by id
   async deleteFoodById(req) {
-    const { userId } = req.user;
-    await this.dbFood
-      .findById(req.params.id)
-      .then((food) => {
-        if (!food) throw new NotFoundError(foodMessage.notFound);
-        if (userId !== food.userId) throw new AuthorizationError(foodMessage.forbidden);
+    // Request parameters validation schema
+    const schema = Joi.object().keys({
+      id: Joi.string().guid().required(),
+    });
 
-        return this.dbFood.deleteById(req.params.id);
-      });
+    // Validate from request parameters
+    await schema.validateAsync(req.params).catch((joiError) => {
+      throw new InvariantError(joiError.details.map((x) => x.message));
+    });
+
+    // Verify if food is exists
+    const food = await this.dbFood.findById(req.params.id);
+    if (!food) throw new NotFoundError(foodMessage.notFound);
+
+    console.log(`Delete food: [${food.getDataValue('category')}] ${JSON.stringify(food)}`);
+    
+    // Delete the image from Google Cloud Storage
+    let resultDeleteImg;
+    if (food.getDataValue('photo')) {
+      console.log(`Delete image: ${food.getDataValue('photo')}`);
+      resultDeleteImg = await deleteImage(
+        "food",
+        `${food.getDataValue('category')}-${food.name}.jpeg`
+      );
+    } else {
+      resultDeleteImg = 0
+    };
+
+    // Delete the specified food
+    const resultDelete = await this.dbFood
+      .deleteById(food.id)
+      .then((food) => food);
+
+    return resultDelete || resultDeleteImg;
   }
 
-  async resolveFoods(ids) {
-    const foods = [];
-    await Promise.all(
-      ids.map(async (id) => {
-        await this.resolveFood(id).then((food) => {
-          foods.push(food);
-        });
-      }),
-    );
-
-    return foods;
-  }
-
-  async resolveFood(id) {
-    return this.dbFood
-      .findById(id)
-      .then(async (food) => {
-        if (food) {
-          food.images = [];
-          for (let i = 0; i < food.text.length; i += 1) {
-            food.images.push(getImageFromLetter(food.text[i]));
-          }
-        }
-
-        return food;
-      });
-  }
 }
 
 module.exports = FoodService;

@@ -67,5 +67,5 @@ module.exports = function routes(express, app) {
   app.use('/food',  FoodRouter (express, verifyToken, foodController));
   app.use('/user',  UserRouter (express, verifyToken, userController));
   app.use('/scan',  ScanRouter (express, verifyToken, scanController));
-
+  return app;
 }
