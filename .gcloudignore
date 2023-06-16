@@ -1,0 +1,12 @@
+.sql/
+node_modules/
+src/services/predict/*
+
+.editorconfig
+.env
+.env.example
+.gitignore
+app-example.yaml
+keterangan.txt
+README.md
+testimg
