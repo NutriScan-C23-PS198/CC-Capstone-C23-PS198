@@ -7,8 +7,9 @@ const { getImageFromLetter, getFirstLetterFromPhrase } = require('../helpers/foo
 const { isValidEmail, isValidPass } = require('../helpers/validator');
 
 class AuthService {
-  constructor(DBAuth) {
+  constructor(DBAuth, DBUser) {
     this.dbAuth = DBAuth;
+    this.dbUser = DBUser;
   }
 
   async register(req) {
@@ -54,27 +55,39 @@ class AuthService {
 
     if (!match) throw new AuthenticationError(usersMessage.invalidLogin);
 
-    const accessToken  = jwt.sign({ id: user.id }, process.env.ACCESS_TOKEN_SECRET,  { expiresIn: '1d' });
-    const refreshToken = jwt.sign({ id: user.id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+    // Issue new JWT token
+    const token = jwt.sign(
+      {
+        username: user.username,
+        role    : user.role,
+      },
+      process.env.TOKEN_KEY,
+      { expiresIn: '365d' }
+    );
+    // const refreshToken = jwt.sign({ id: user.id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
-    return { accessToken, refreshToken };
+    // Update `token` row of User table with new token
+    await this.dbUser.update(user.id, { token: token });
+
+    return { token };
   }
 
   async logout(req) {
     const schema = Joi.object().keys({
-      accessToken: Joi.string().required(),
-      refreshToken: Joi.string().required(),
+      token: Joi.string().required(),
     });
+
     await schema.validateAsync(req.body).catch((joiError) => {
       throw new InvariantError(joiError.details.map((x) => x.message));
     });
 
-    const { accessToken, refreshToken } = req.body;
-    const user = await this.dbAuth.findByRefreshToken(refreshToken);
+    const { token, user } = req.body;
+    // const user = await this.dbAuth.findByRefreshToken(refreshToken);
 
     if (!user) throw new AuthenticationError(usersMessage.invalidLogout);
 
-    return this.dbAuth.deleteRefreshToken(refreshToken);
+    // return this.dbAuth.deleteRefreshToken(refreshToken);
+    return this.dbUser.update(user.id, { token: null });
   }
 
   // async getAllUsers(req) {

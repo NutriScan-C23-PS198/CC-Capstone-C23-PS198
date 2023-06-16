@@ -15,6 +15,7 @@ module.exports = {
     notLogin: 'not logged in',
     invalidEmail: 'invalid email',
     minimumPass: 'password must be at least 6 characters',
+    unauthorizedAccess: 'you don\'t have permission to access this resource',
   },
 
   food: {

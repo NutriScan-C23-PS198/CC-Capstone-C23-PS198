@@ -1,5 +1,5 @@
 const { handleError } = require('../helpers/exceptions');
-const verifyToken     = require('../helpers/middleware');
+const { verifyToken, verifyAccess } = require('../helpers/middleware');
 
 // Router
 const BrandRouter = require('./brand');
@@ -41,7 +41,7 @@ const brandService = new BrandService(dbBrand);
 const foodService  = new FoodService(dbFood);
 const userService  = new UserService(dbUser);
 const scanService  = new ScanService(dbScan, dbUser, dbFood);
-const authService  = new AuthService(dbAuth);
+const authService  = new AuthService(dbAuth, dbUser);
 
 const brandController = new BrandController(brandService);
 const foodController  = new FoodController(foodService);
@@ -64,8 +64,8 @@ module.exports = function routes(express, app, upload) {
   app.use(router);
 
   // app.use('/brand', BrandRouter(express, verifyToken, brandController));
-  app.use('/food',  FoodRouter (express, verifyToken, foodController));
-  app.use('/user',  UserRouter (express, verifyToken, userController));
-  app.use('/scan',  ScanRouter (express, verifyToken, scanController));
+  app.use('/food',  FoodRouter (express, verifyToken, verifyAccess, foodController));
+  app.use('/user',  UserRouter (express, verifyToken, verifyAccess, userController));
+  app.use('/scan',  ScanRouter (express, verifyToken, verifyAccess, scanController));
   return app;
 }
