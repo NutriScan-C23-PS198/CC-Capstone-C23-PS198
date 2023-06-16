@@ -129,12 +129,13 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-.sql/
+#.sql/
 
 # NOTE: Remove this later after prediction available
 src/services/predict/*
 
 app.yaml
 sandbox-388314413993-9532539946bd.json
+nutriscan-c23-ps198-4f8fc1b957cf.json
 testimg
 app.yaml
