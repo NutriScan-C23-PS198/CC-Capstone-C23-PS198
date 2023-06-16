@@ -9,7 +9,7 @@ const User  = require('./user/user');
 const Notifs       = require('./notifications');
 
 const FoodCategory = require('./food/food_category');
-const FoodBrand    = require('./food/food_brand'   );
+// const FoodBrand    = require('./food/food_brand'   );
 const FoodHistory  = require('./food/food_history' );
 
 const UserHistory  = require('./user/user_history' );
@@ -29,24 +29,29 @@ FoodCategory.hasMany(Food,   { foreignKey: 'category_id' });
 // Food History
 Food.belongsToMany(
   UserHistory,
+  // {
+  //   through: 'FoodHistory',
+  //   foreignKey: 'food_id',
+  //   otherKey: 'history_id',
+  // }
   {
-    through: 'UserHistoryFood',
-    foreignKey: 'food_id',
-    otherKey: 'history_id',
+    through: 'FoodHistory',
+    foreignKey: 'id',
+    otherKey: 'food_id',
   }
 );
 UserHistory.belongsToMany(
   Food,
   {
-    through: 'UserHistoryFood',
-    foreignKey: 'food_id',
+    through: 'FoodHistory',
+    foreignKey: 'id',
     otherKey: 'history_id',
   }
 );
 
 // User & Food History
-User.hasMany(FoodHistory,    { foreignKey: 'user_id'     });
-FoodHistory.belongsTo(User,  { foreignKey: 'user_id'     });
+User.hasMany(UserHistory,    { foreignKey: 'user_id'     });
+UserHistory.belongsTo(User,  { foreignKey: 'user_id'     });
 
 // User & Logged out Tokens
 User.hasMany(UserTokens,     { foreignKey: 'user_id'     });
@@ -83,8 +88,8 @@ const Models = {
   Notifs      : Notifs,
   
   FoodCategory: FoodCategory,
-  FoodBrand   : FoodBrand,
-  // FoodHistory : FoodHistory,   // NOTE: Not used
+  // FoodBrand   : FoodBrand,
+  FoodHistory : FoodHistory,   // NOTE: Not used
 
   UserHistory : UserHistory,
   UserTokens  : UserTokens,

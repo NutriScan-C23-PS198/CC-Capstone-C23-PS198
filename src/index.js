@@ -7,8 +7,11 @@ const http = require('http');
 const cors = require('cors');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
+const multer = require('multer');
 
 const routes = require('./routes');
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const app = express();
 const HOST = process.env.HOST || '0.0.0.0';
@@ -22,11 +25,12 @@ const corsOptions = {
 
 app.use(helmet());
 app.use(cors(corsOptions));
+app.use(upload.single('photo'));
 app.use(bodyParser.json({ limit: '50mb' }));
-// app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // app.use('/', routes);
-routes(express, app);
+routes(express, app, upload);
 
 // app.listen(PORT, () => {
 //     console.log(

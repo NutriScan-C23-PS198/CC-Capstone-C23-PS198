@@ -2,7 +2,7 @@ const Joi = require('joi');
 const db = require('../databases/index');
 const { NotFoundError, AuthorizationError, InvariantError } = require('../helpers/exceptions');
 const { food: foodMessage } = require('../helpers/response-message');
-const { uploadImage, deleteImage } = require('./storage/storage');
+const { uploadImage, deleteImage } = require('../helpers/storage');
 const getPage = require('../helpers/paging');
 
 class FoodService {
@@ -26,9 +26,11 @@ class FoodService {
       throw new InvariantError(joiError.details.map((x) => x.message));
     });
 
+    console.log(req.query);
+
     // Get page and size from request body
-    const { page,   size  } = req.body;
-    const { offset, limit } = getPage(page, size);
+    const { page,   size  } = req.query;
+    const { offset, limit } = getPage(Number(page), Number(size));
 
     // Get and return result
     return this.dbFood.findAll(offset, limit);
@@ -40,27 +42,35 @@ class FoodService {
     // Validation schema, either by id, by name, or both
     const schema = Joi.object().keys({
       id: Joi.alternatives()
-        .conditional('name', { is: Joi.exist(), then: Joi.optional(), otherwise: Joi.string().required() }),
+        .conditional('name', {
+          is: Joi.exist(),
+          then: Joi.optional(),
+          otherwise: Joi.string().required()
+        }),
       name: Joi.alternatives()
-        .conditional('id',   { is: Joi.exist(), then: Joi.optional(), otherwise: Joi.string().required() }),
+        .conditional('id', {
+          is: Joi.exist(),
+          then: Joi.optional(),
+          otherwise: Joi.string().required()
+        }),
     });
 
     // Validate from request body
-    await schema.validateAsync(req.body).catch((joiError) => {
+    await schema.validateAsync(req.query).catch((joiError) => {
       throw new InvariantError(joiError.details.map((x) => x.message));
     });
     
-    if (req.body.id) {  // Find by id
+    if (req.query.id) {  // Find by id
       return this.dbFood
-        .findById(req.body.id)
+        .findById(req.query.id)
         .then((food) => {
           if (!food) throw new NotFoundError(foodMessage.notFound);
           return food;
         });
     } else {            // Find by name
-      console.log(`Find by name: ${req.body.name}`);
+      console.log(`Find by name: ${req.query.name}`);
       return this.dbFood
-        .findByName(req.body.name)
+        .findByName(req.query.name)
         .then((food) => {
           if (!food) throw new NotFoundError(foodMessage.notFound);
           return food;
@@ -71,6 +81,15 @@ class FoodService {
 
   // Add new food data
   async createFood(req) {
+
+    //? handling multipart/form-data requests
+    //? geting the file from the request
+    const file = req.file;
+    //? getting the text from the request
+    const body = req.body;
+
+    // return;
+
     // Validation schema
     const schema = Joi.object().keys({
       name       : Joi.string().required(),
@@ -102,7 +121,8 @@ class FoodService {
       req.body.photo = await uploadImage(
         "food",
         `${req.body.category}-${req.body.name}.jpeg`,
-        req.body.photo
+        // req.body.photo
+        file
       );
     }
 

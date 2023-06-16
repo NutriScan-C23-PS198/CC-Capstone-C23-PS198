@@ -6,7 +6,7 @@ const { NotFoundError, AuthenticationError, InvariantError } = require('../helpe
 const { users: usersMessage } = require('../helpers/response-message');
 const { getImageFromLetter, getFirstLetterFromPhrase } = require('../helpers/food-images');
 const { isValidEmail, isValidUsername, isValidPass } = require('../helpers/validator');
-const { uploadImage, deleteImage } = require('./storage/storage');
+const { uploadImage, deleteImage } = require('../helpers/storage');
 const getPage = require('../helpers/paging');
 
 class UserService {

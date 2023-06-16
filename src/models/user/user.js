@@ -10,7 +10,6 @@ const User = db.define(
       primaryKey: true,
       unique: true,
       allowNull: false,
-      // defaultValue: Sequelize.UUIDV4,
       defaultValue: db.fn('UUID_TO_BIN', uuid.v4(), 1),
       get: function() {
         if (this.getDataValue('id'))

@@ -25,4 +25,10 @@ module.exports = {
     nameIsExist: 'food {FOODNAME} is already exists',
   },
 
+  scan: {
+    create: 'new scan history has been created',
+    delete: 'scan history has been deleted',
+    notFound: 'scan histoy not found',
+  }
+
 };

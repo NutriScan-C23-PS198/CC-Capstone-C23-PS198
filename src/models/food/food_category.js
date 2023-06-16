@@ -10,7 +10,7 @@ const FoodCategory = db.define(
       unique: true,
       allowNull: false,
       autoIncrement: true,
-      defaultValue: DataTypes.UUIDV4,
+      defaultValue: 1,
       get: function() {
         return this.getDataValue('id');
       },

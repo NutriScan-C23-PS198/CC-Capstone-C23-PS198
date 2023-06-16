@@ -16,7 +16,7 @@ class ScanController {
     return this.scanService
       .getAllScans(req)
       .then((foods) => res.status(200).json(foods))
-      .catch((error) => next(error));
+      // .catch((error) => next(error));
   }
 
   async getScanById(req, res, next) {
@@ -39,7 +39,7 @@ class ScanController {
       .then((scan) => res.status(201).json({
         data: scan,
       }))
-      .catch((error) => next(error));
+      // .catch((error) => next(error));
   }
 
   async updateScanById(req, res, next) {

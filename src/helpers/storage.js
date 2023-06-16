@@ -9,16 +9,22 @@ const storage = new Storage({
 const bucket = storage.bucket(process.env.GCLOUD_STORAGE_BUCKET);
 
 // Upload image from base64 encoded string
-async function uploadImage(dir, filename, file) {
-  // ? Remove header from base64 string
-  file = file.replace(/^data:image\/\w+;base64,/, '');
+async function uploadImage(dir, filename, file=null, buffer=null) {
+  // TODO: Change the file passing method directly to buffer
   
-  // ? Remove new line characters from base64 string
-  file = file.replace(/\n/g, '');
+  // TODO: Move this as image helpers
+  if (!buffer) {
+    // ? Remove header from base64 string
+    file = file.replace(/^data:image\/\w+;base64,/, '');
+    
+    // ? Remove new line characters from base64 string
+    file = file.replace(/\n/g, '');
+    
+    // ? Create buffer from base64 string and
+    // ? upload to Google Cloud Storage
+    buffer     = Buffer.from(file, 'base64');
+  }
   
-  // ? Create buffer from base64 string and
-  // ? upload to Google Cloud Storage
-  const buffer     = Buffer.from(file, 'base64');
   const blob       = bucket.file(`${dir}/${filename}`);
   const blobStream = blob.createWriteStream({
     resumable: false,

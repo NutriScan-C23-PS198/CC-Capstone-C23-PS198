@@ -40,7 +40,7 @@ const dbAuth  = new DBAuth();
 const brandService = new BrandService(dbBrand);
 const foodService  = new FoodService(dbFood);
 const userService  = new UserService(dbUser);
-const scanService  = new ScanService(dbScan);
+const scanService  = new ScanService(dbScan, dbUser, dbFood);
 const authService  = new AuthService(dbAuth);
 
 const brandController = new BrandController(brandService);
@@ -50,7 +50,7 @@ const scanController  = new ScanController(scanService);
 const authController  = new AuthController(authService);
 
 
-module.exports = function routes(express, app) {
+module.exports = function routes(express, app, upload) {
   const router = express.Router();
 
   app.get('/', (req, res) => {
@@ -63,7 +63,7 @@ module.exports = function routes(express, app) {
   router.post('/logout',   userController.logout);
   app.use(router);
 
-  app.use('/brand', BrandRouter(express, verifyToken, brandController));
+  // app.use('/brand', BrandRouter(express, verifyToken, brandController));
   app.use('/food',  FoodRouter (express, verifyToken, foodController));
   app.use('/user',  UserRouter (express, verifyToken, userController));
   app.use('/scan',  ScanRouter (express, verifyToken, scanController));
