@@ -38,7 +38,7 @@
     "ndarray": "^1.0.19",
     "node-uuid": "^1.4.8",
     "sequelize": "^6.32.0",
-    "sharp": "^0.32.1"
+    "sharp": "^0.32.6"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
