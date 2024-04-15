@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/risydah13/NutriScan-CC-project#readme",
   "dependencies": {
-    "@google-cloud/aiplatform": "^2.15.0",
+    "@google-cloud/aiplatform": "^3.18.0",
     "@google-cloud/error-reporting": "^3.0.5",
     "@google-cloud/storage": "^6.11.0",
     "bcrypt": "^5.1.0",
